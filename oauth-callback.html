@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>X OAuth 認証コールバック</title>
+  <script>
+    // X（Twitter）の認証プロセスでは、認証後にこのページに以下のようなクエリパラメータが付与されて戻ってきます
+    // 例: ?code=XXXX&state=YYYY （OAuth 2.0の場合）
+    // これらのパラメータは認証プロセスを完了するために必要です
+    const queryParams = window.location.search;
+
+    // デバッグ情報を表示する関数
+    function showDebugInfo() {
+      const debugDiv = document.getElementById('debug-info');
+      if (debugDiv) {
+        debugDiv.innerHTML = '<p><strong>現在のURL:</strong> ' + window.location.href + '</p>' +
+                           '<p><strong>クエリパラメータ:</strong> ' + queryParams + '</p>';
+        debugDiv.style.display = 'block';
+      }
+    }
+
+    if (queryParams) {
+
+      // GAS側のコールバックURLを設定します（YOUR_SCRIPT_ID を実際のスクリプトIDに置き換えてください）
+      // OAuth 2.0 User Contextを使用するため、/usercallbackエンドポイントを使用します
+      //   const gasCallbackUrl = 'https://script.google.com/macros/d/YOUR_SCRIPT_ID/usercallback'
+      const gasCallbackUrl = 'https://script.google.com/macros/d/1vKbQ2yiYgkQM_1hI9fiRvRoHDfZ_SjzAF42rP-z4q5z563xLp0YldsC0/usercallback';
+      
+      // デバッグ用に5秒間待機してからリダイレクト
+      setTimeout(function() {
+        // GASのコールバックURLにクエリパラメータを付与してリダイレクトします
+        window.location.href = gasCallbackUrl + queryParams;
+      }, 5000); // 5秒後にリダイレクト
+    } else {
+      // クエリパラメータがない場合はエラーメッセージを表示
+      document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('error-message').style.display = 'block';
+      });
+    }
+
+    // ページ読み込み時にデバッグ情報を表示
+    document.addEventListener('DOMContentLoaded', function() {
+      showDebugInfo();
+    });
+  </script>
+  <style>
+    #debug-info {
+      background-color: #f8f9fa;
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin: 10px 0;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <h1>X(Twitter)認証処理中</h1>
+  <p>認証処理を実行中です。デバッグのため5秒後に自動的にリダイレクトされます。</p>
+  <p>自動的にリダイレクトされない場合は、下記のリンクをクリックしてください。</p>
+  <p><a id="redirect-link" href="#">リダイレクトする</a></p>
+  <div id="error-message" style="display: none; color: red;">
+    <p>エラー: 認証パラメータが見つかりません。X(Twitter)認証プロセスを最初からやり直してください。</p>
+  </div>
+  
+  <!-- デバッグ情報表示エリア -->
+  <div id="debug-info" style="display: none;"></div>
+  
+  <script>
+    // 予備のリンクにも同じURLを設定します
+    // これは自動リダイレクトが機能しない場合のフォールバック（予備）として用意されています
+    if (queryParams) {
+    // const gasCallbackUrl = 'https://script.google.com/macros/d/YOUR_SCRIPT_ID/usercallback';
+      const gasCallbackUrl = 'https://script.google.com/macros/d/1vKbQ2yiYgkQM_1hI9fiRvRoHDfZ_SjzAF42rP-z4q5z563xLp0YldsC0/usercallback';
+      document.getElementById('redirect-link').href = gasCallbackUrl + queryParams;
+    }
+  </script>
+</body>
+</html>
